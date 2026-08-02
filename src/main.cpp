@@ -4,6 +4,7 @@
 #include <ArduinoJson.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <vector>
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -25,12 +26,15 @@ bool authenticated = false;
 int id_num_hotkey = 0;
 
 // BUTTONS
-const int angryButtonPin = 4;
-bool lastAngryButtonState = HIGH;
-const int sadButtonPin = 13;
-bool lastSadButtonState = HIGH;
-const int darkButtonPin = 27;
-bool lastDarkButtonState = HIGH;
+// const int angryButtonPin = 4;
+// bool lastAngryButtonState = HIGH;
+// const int sadButtonPin = 13;
+// bool lastSadButtonState = HIGH;
+// const int darkButtonPin = 27;
+// bool lastDarkButtonState = HIGH;
+std::vector<int> buttonPins = {13, 4, 27};
+std::vector<bool> lastButtonStates = {HIGH, HIGH, HIGH};
+std::vector<String> buttonNames = {"Angry", "Crying", "Dark-face"};
 
 String wifiStatus = "WiFi: starting";
 String apiStatus = "API: disconnected";
@@ -189,9 +193,12 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  pinMode(angryButtonPin, INPUT_PULLUP);
-  pinMode(sadButtonPin, INPUT_PULLUP);
-  pinMode(darkButtonPin, INPUT_PULLUP);
+  // pinMode(angryButtonPin, INPUT_PULLUP);
+  // pinMode(sadButtonPin, INPUT_PULLUP);
+  // pinMode(darkButtonPin, INPUT_PULLUP);
+  for (int i : buttonPins){
+    pinMode(i, INPUT_PULLUP);
+  }
 
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) 
   { 
@@ -229,31 +236,45 @@ void setup() {
 void loop() {
   webSocket.loop();
 
-  bool currentStateAngry = digitalRead(angryButtonPin);
-  bool currentStateSad = digitalRead(sadButtonPin);
-  bool currentStateDark = digitalRead(darkButtonPin);
-
-  if (lastAngryButtonState == HIGH && currentStateAngry == LOW) {
-    triggerHotkey("Angry");
-    Serial.println("Button pressed");
-    pressStatus = "Press: Angry";
-    drawScreen();
-    delay(200);
-  } if (lastSadButtonState == HIGH && currentStateSad == LOW) {
-    triggerHotkey("Crying");
-    Serial.println("Button pressed");
-    pressStatus = "Press: Crying";
-    drawScreen();
-    delay(200);
-  } if (lastDarkButtonState == HIGH && currentStateDark == LOW) {
-    triggerHotkey("Dark-face");
-    Serial.println("Button pressed");
-    pressStatus = "Press: Dark face";
-    drawScreen();
-    delay(200);
+  // bool currentStateAngry = digitalRead(angryButtonPin);
+  // bool currentStateSad = digitalRead(sadButtonPin);
+  // bool currentStateDark = digitalRead(darkButtonPin);
+  std::vector<bool> currentStates;
+  for (int i : buttonPins){
+    currentStates.push_back(digitalRead(i));
   }
 
-  lastAngryButtonState = currentStateAngry;
-  lastSadButtonState = currentStateSad;
-  lastDarkButtonState = currentStateDark;
+  // if (lastAngryButtonState == HIGH && currentStateAngry == LOW) {
+  //   triggerHotkey("Angry");
+  //   Serial.println("Button pressed");
+  //   pressStatus = "Press: Angry";
+  //   drawScreen();
+  //   delay(200);
+  // } if (lastSadButtonState == HIGH && currentStateSad == LOW) {
+  //   triggerHotkey("Crying");
+  //   Serial.println("Button pressed");
+  //   pressStatus = "Press: Crying";
+  //   drawScreen();
+  //   delay(200);
+  // } if (lastDarkButtonState == HIGH && currentStateDark == LOW) {
+  //   triggerHotkey("Dark-face");
+  //   Serial.println("Button pressed");
+  //   pressStatus = "Press: Dark face";
+  //   drawScreen();
+  //   delay(200);
+  // }
+
+  // lastAngryButtonState = currentStateAngry;
+  // lastSadButtonState = currentStateSad;
+  // lastDarkButtonState = currentStateDark;
+  for (int i = 0; i < buttonPins.size(); i++){
+    if (lastButtonStates[i] == HIGH && currentStates[i] == LOW) {
+      triggerHotkey(buttonNames[i]);
+      Serial.println("Button pressed");
+      pressStatus = "Press: " + buttonNames[i];
+      drawScreen();
+      delay(200);
+    } 
+    lastButtonStates[i] = currentStates[i];
+  }
 }
