@@ -1,0 +1,10 @@
+
+#pragma once
+
+// note R"KEYWORD( html page code )KEYWORD"; 
+
+const char PAGE_MAIN[] PROGMEM = R"=====(
+
+1234567
+
+)=====";

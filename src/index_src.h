@@ -1,0 +1,172 @@
+
+#pragma once
+
+// note R"KEYWORD( html page code )KEYWORD"; 
+
+const char PAGE_MAIN[] PROGMEM = R"=====(
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello Kitty Form</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #ffd6e7, #fff0f6);
+      color: #5a2a3a;
+      font-family: "Arial", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .form-container {
+      background: linear-gradient(180deg, #fff7fb, #ffe4f0);
+      padding: 22px 30px;
+      border-radius: 18px;
+      box-shadow: 0 8px 30px rgba(255, 105, 180, 0.25);
+      width: 600px;
+      border: 2px solid #ffb6d5;
+    }
+
+    .form-header {
+      margin-bottom: 14px;
+      font-size: 18px;
+      text-align: center;
+      color: #d94f8a;
+      font-weight: bold;
+    }
+
+    .status {
+      margin-bottom: 12px;
+      text-align: center;
+      font-size: 14px;
+      color: #c05a86;
+      min-height: 1.2em;
+      font-weight: bold;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 30em;
+      resize: vertical;
+      padding: 12px;
+      border: 2px solid #ffb6d5;
+      border-radius: 14px;
+      background-color: #fffafd;
+      color: #5a2a3a;
+      font-size: 14px;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+      font-family: monospace;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #ff6fae;
+      box-shadow: 0 0 0 3px rgba(255, 111, 174, 0.2);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ff8fc1, #ff5fa2);
+      color: #ffffff;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px #d94f8a;
+      transition: all 0.1s ease-in-out;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: linear-gradient(180deg, #ff9fcb, #ff6bb0);
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px #d94f8a;
+    }
+  </style>
+</head>
+
+<body onload="process(); loadNames();">
+  <div class="form-container">
+    <div class="form-header" id="header">Edit names map JSON</div>
+    <div class="status" id="status"></div>
+    <textarea id="textInput" rows="30" cols="50" placeholder="Type here..."></textarea>
+    <button type="button" id="submitBtn" onclick="submitForm()">Submit</button>
+  </div>
+</body>
+
+<script type="text/javascript">
+  var xmlHttp = new XMLHttpRequest();
+
+  function setStatus(msg, good) {
+    const el = document.getElementById("status");
+    el.textContent = msg;
+    el.style.color = good ? "#d94f8a" : "#ff4f87";
+  }
+
+  function response() {
+    if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+      var response = xmlHttp.responseXML;
+      console.log("Response from server: " + response);
+    }
+  }
+
+  function loadNames() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+      if (xhttp.readyState == 4) {
+        if (xhttp.status == 200) {
+          document.getElementById("textInput").value = xhttp.responseText;
+          setStatus("Loaded names from server", true);
+          console.log("Loaded names from server");
+        } else {
+          setStatus("Failed to load names", false);
+          console.log("Failed to load names, status:", xhttp.status);
+        }
+      }
+    };
+    xhttp.open("GET", "getnames", true);
+    xhttp.send();
+  }
+
+  function submitForm() {
+    var xhttp = new XMLHttpRequest();
+    var textValue = encodeURIComponent(document.getElementById("textInput").value);
+
+    xhttp.onreadystatechange = function () {
+      if (xhttp.readyState == 4) {
+        if (xhttp.status == 200 && xhttp.responseText.trim() == "OK") {
+          setStatus("Names updated successfully", true);
+        } else {
+          setStatus("Update failed: " + xhttp.responseText, false);
+        }
+      }
+    };
+
+    xhttp.open("PUT", "submit?VALUE=" + textValue, true);
+    console.log("Submitting: " + document.getElementById("textInput").value);
+    xhttp.send();
+  }
+
+  function process() {
+    if (xmlHttp.readyState == 0 || xmlHttp.readyState == 4) {
+      xmlHttp.open("PUT", "xml", true);
+      xmlHttp.onreadystatechange = response;
+      xmlHttp.send(null);
+    }
+    setTimeout("process()", 200);
+  }
+</script>
+
+</html>
+)=====";
