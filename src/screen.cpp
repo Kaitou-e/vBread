@@ -4,6 +4,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "screen.hpp"
+#include <vector>
 
 #define SCREEN_HEIGHT 64
 #define SCREEN_WIDTH 128
@@ -22,14 +23,21 @@ void initScreen()
     display.display();
 }
 
+// std::vector<int> buttonPinstest = {6, 7, 10, 4, 2, 20, 0, 1, 3};
 void drawScreen()
 {
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
 
-    display.setCursor(0, 0);
-    display.println(wifiStatus);
+    for (int i = 0; i < 9; i++)
+    {
+        int pinState = digitalRead(buttonPins[i]);
+        display.setCursor(i * 5, 0);
+        display.print(pinState);
+    }
+    // display.setCursor(0, 0);
+    // display.println(wifiStatus);
 
     display.setCursor(0, 16);
     display.println(apiStatus);

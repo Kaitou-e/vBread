@@ -15,7 +15,9 @@ const char *host = "192.168.137.1";
 const uint16_t port = 8001;
 const char *path = "/";
 
-std::vector<int> buttonPins = {13, 4, 27, 26, 25, 33};
+// std::vector<int> buttonPins = {13, 4, 27, 26, 25, 33};
+// std::vector<int> buttonPins = {6, 7, 10, 5, 3, 20, 0, 1, 4};
+std::vector<int> buttonPins = {5, 6, 7, 4, 20, 10, 0, 1, 3};
 unsigned int max_code = 0, btn_code = 0, last_code = 0;
 std::map<int, String> names = {
     {1, "Angry"},
@@ -38,19 +40,21 @@ void setup()
   delay(1000);
 
   for (int i : buttonPins)
-    pinMode(i, INPUT_PULLUP);
+    pinMode(i, INPUT);
 
   initStorage();
   initScreen();
-  initWiFi(ssid, password);
-  WebPage::init_html_pages();
-  initWebSocket();
+  // initWiFi(ssid, password);
+  // WebPage::init_html_pages();
+  // initWebSocket();
 }
 
 void loop()
 {
-  webSocket.loop();
-  WebPage::server.handleClient();
+  // webSocket.loop();
+  // WebPage::server.handleClient();
+
+  drawScreen();
 
   for (int i = 0; i < 9; i++)
   {
