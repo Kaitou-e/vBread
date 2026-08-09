@@ -30,14 +30,14 @@ void drawScreen()
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
 
-    for (int i = 0; i < 9; i++)
-    {
-        int pinState = digitalRead(buttonPins[i]);
-        display.setCursor(i * 5, 0);
-        display.print(pinState);
-    }
-    // display.setCursor(0, 0);
-    // display.println(wifiStatus);
+    // for (int i = 0; i < 9; i++)
+    // {
+    //     int pinState = digitalRead(buttonPins[i]);
+    //     display.setCursor(i * 5, 0);
+    //     display.print(pinState);
+    // }
+    display.setCursor(0, 0);
+    display.println(wifiStatus);
 
     display.setCursor(0, 16);
     display.println(apiStatus);

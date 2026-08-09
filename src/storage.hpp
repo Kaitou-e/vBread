@@ -10,5 +10,8 @@ extern const char *NAMES_FILE;
 bool saveNames();
 bool loadNames();
 bool initStorage();
+bool saveAuthToken(const String &token);
+bool loadAuthToken(String &token);
+bool deleteAuthToken();
 
 #endif

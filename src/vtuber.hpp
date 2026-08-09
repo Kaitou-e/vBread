@@ -23,6 +23,7 @@ extern String apiStatus;
 
 void sendJson(const JsonDocument &doc);
 void requestAuthToken();
+void checkVTubeConnection();
 void sendAuthenticate();
 void sendApiStateRequest();
 void triggerHotkey(String name);

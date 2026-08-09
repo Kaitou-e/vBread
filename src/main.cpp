@@ -43,18 +43,20 @@ void setup()
     pinMode(i, INPUT);
 
   initStorage();
+  loadAuthToken(authToken);
   initScreen();
-  // initWiFi(ssid, password);
-  // WebPage::init_html_pages();
-  // initWebSocket();
+  initWiFi(ssid, password);
+  WebPage::init_html_pages();
+  initWebSocket();
 }
 
 void loop()
 {
-  // webSocket.loop();
-  // WebPage::server.handleClient();
+  webSocket.loop();
+  checkVTubeConnection();
+  WebPage::server.handleClient();
 
-  drawScreen();
+  // drawScreen();
 
   for (int i = 0; i < 9; i++)
   {

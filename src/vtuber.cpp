@@ -4,9 +4,12 @@
 #include "vtuber.hpp"
 #include "screen.hpp"
 #include <vector>
+#include "storage.hpp"
 
 const char *pluginName = "vBread";
 const char *pluginDeveloper = "Kaitou e";
+unsigned long lastAuthAttempt = 0;
+const unsigned long authRetryMs = 5000;
 
 WebSocketsClient webSocket;
 String authToken = "";
@@ -28,6 +31,45 @@ void sendJson(const JsonDocument &doc)
     webSocket.sendTXT(msg);
     Serial.println("Sent:");
     Serial.println(msg);
+}
+
+void startAuthentication()
+{
+    if (!webSocket.isConnected())
+        return;
+
+    authenticated = false;
+    lastAuthAttempt = millis();
+
+    if (authToken.isEmpty())
+    {
+        Serial.println("No saved token; requesting new authorization token");
+        apiStatus = "API: requesting token";
+        drawScreen();
+
+        requestAuthToken();
+    }
+    else
+    {
+        Serial.println("Using saved token to authenticate");
+        apiStatus = "API: authenticating";
+        drawScreen();
+
+        sendAuthenticate();
+    }
+}
+
+void checkVTubeConnection()
+{
+    if (!webSocket.isConnected())
+        return;
+
+    // Connected but no successful authentication response arrived.
+    if (!authenticated && millis() - lastAuthAttempt >= authRetryMs)
+    {
+        Serial.println("Auth timed out; retrying authentication");
+        startAuthentication();
+    }
 }
 
 void requestAuthToken()
@@ -125,17 +167,27 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
     if (type == WStype_CONNECTED)
     {
         Serial.println("WebSocket connected");
-        // requestedToken = false;
-        // authenticated = false;
-        // requestAuthToken();
-        // requestedToken = true;
+
+        authenticated = false;
+        requestedToken = false;
+
         apiStatus = "API: connected";
         drawScreen();
-        if (!authenticated && !requestedToken)
+
+        if (authToken.isEmpty())
         {
-            requestAuthToken();
+            Serial.println("No saved token; requesting a new token");
+
             requestedToken = true;
+            requestAuthToken();
         }
+        else
+        {
+            Serial.println("Saved token found; authenticating with it");
+
+            sendAuthenticate();
+        }
+
         return;
     }
 
@@ -163,9 +215,13 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
             if (doc["data"]["authenticationToken"].is<const char *>())
             {
                 authToken = doc["data"]["authenticationToken"].as<const char *>();
-                Serial.println("Got auth token");
+
+                Serial.println("Got new auth token");
+                saveAuthToken(authToken);
+
                 apiStatus = "API: got token";
                 drawScreen();
+
                 sendAuthenticate();
             }
         }
@@ -173,13 +229,26 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
         {
             bool authenticatedOk = doc["data"]["authenticated"] | false;
             authenticated = authenticatedOk;
-            apiStatus = authenticated ? "API: authed" : "API: auth failed";
-            drawScreen();
-            Serial.print("Authenticated: ");
-            Serial.println(authenticated ? "true" : "false");
+
             if (authenticated)
             {
+                apiStatus = "API: authed";
+                drawScreen();
+
+                Serial.println("VTube Studio authentication successful");
                 sendApiStateRequest();
+            }
+            else
+            {
+                Serial.println("Saved token rejected; requesting a new one");
+
+                authToken = "";
+                deleteAuthToken();
+
+                apiStatus = "API: token rejected";
+                drawScreen();
+
+                requestAuthToken();
             }
         }
         else if (strcmp(msgType, "APIStateResponse") == 0)

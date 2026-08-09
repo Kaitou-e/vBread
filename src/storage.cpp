@@ -31,6 +31,67 @@ bool saveNames()
     return true;
 }
 
+bool saveAuthToken(const String &token)
+{
+    File file = LittleFS.open("/vtube_token.txt", "w");
+
+    if (!file)
+    {
+        Serial.println("Could not open token file for writing");
+        return false;
+    }
+
+    file.print(token);
+    file.close();
+
+    Serial.println("Saved VTube Studio auth token");
+    return true;
+}
+
+bool loadAuthToken(String &token)
+{
+    if (!LittleFS.exists("/vtube_token.txt"))
+    {
+        Serial.println("No saved VTube Studio token");
+        return false;
+    }
+
+    File file = LittleFS.open("/vtube_token.txt", "r");
+
+    if (!file)
+    {
+        Serial.println("Could not open token file for reading");
+        return false;
+    }
+
+    token = file.readString();
+    token.trim();
+    file.close();
+
+    if (token.isEmpty())
+    {
+        Serial.println("Saved VTube Studio token was empty");
+        return false;
+    }
+
+    Serial.println("Loaded saved VTube Studio auth token");
+    return true;
+}
+
+bool deleteAuthToken()
+{
+    if (!LittleFS.exists("/vtube_token.txt"))
+        return true;
+
+    bool deleted = LittleFS.remove("/vtube_token.txt");
+
+    Serial.println(deleted
+                       ? "Deleted invalid VTube Studio token"
+                       : "Could not delete VTube Studio token");
+
+    return deleted;
+}
+
 bool loadNames()
 {
     if (!LittleFS.exists(NAMES_FILE))
