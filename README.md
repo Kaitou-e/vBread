@@ -1,6 +1,7 @@
 # vBread
-vBread is an ESP32 powered API controller for VTube Studio. Toggle expressions, manage scenes, re-calibrate and more using just a low-cost microcontroller.
+vBread is an ESP32 powered, 3x3 API buttonboard for VTube Studio. Toggle expressions, manage scenes, re-calibrate, and more using just a low-cost microcontroller.
 
-https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fdenchisoft.com%2F&ved=0CBcQjRxqGAoTCMDA47e-s5cDFQAAAAAdAAAAABCRAQ&opi=89978449![Uploading image.png…]()
+<img width="1111" height="744" alt="image" src="https://github.com/user-attachments/assets/0507def6-7919-446a-aa9d-ed1a04e6d01e" />
 -# Credit: VTube Studio. Denchisoft
 
+vBread supports multi-press combination toggles. Expression toggles are customizable using a locally hosted web interface.
